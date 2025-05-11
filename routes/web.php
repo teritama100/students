@@ -26,4 +26,4 @@ Route::get('/top7','GController@topView')->name('G');
 Route::get('/top8','HController@topView')->name('H');
 
 Route::get('/inofrmation','AController@A');
-Route::post('top2','AController@add');
+Route::post('top3','AController@add');
