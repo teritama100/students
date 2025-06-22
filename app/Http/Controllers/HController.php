@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-class HController extends Controller
+class HController extends Controller //
 {
     public function topView(){
-        return view('H');
+        return view('grades.edit');
     }
 }

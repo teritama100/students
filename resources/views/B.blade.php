@@ -2,13 +2,27 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>syudents_system</title>
+    <title>メニュー</title>
 </head>
 <body>
-    <h1>メニュー画面</h1>
-    <a href="http://localhost:8888/students/public/top2"><input type="submit" value="学生更新" action="http://localhost:8888/students/public/top2"></a>
-    <a href="http://localhost:8888/students/public/top4"><input type="submit" value="学生登録" action="http://localhost:8888/students/public/top4"></a>
-    <a href="http://localhost:8888/students/public/top5"><input type="submit" value="学生表示" action="http://localhost:8888/students/public/top3"></a>
+    <h1>学生管理システム メニュー</h1>
+
+    <!-- 学生登録画面へ -->
+    <form action="{{ url('/top4') }}" method="GET">
+        <button type="submit">学生登録画面へ</button>
+    </form>
+    <br>
+
+    <!-- 学生表示（検索）画面へ -->
+    <form action="{{ url('/top3') }}" method="GET">
+        <button type="submit">学生表示画面へ</button>
+    </form>
+    <br>
+
+    <!-- 学年更新ボタン -->
+    <form action="{{ url('/students/update-grade') }}" method="POST">
+        @csrf
+        <button type="submit" onclick="return confirm('全学生の学年を更新しますか？')">全学生の学年を更新</button>
+    </form>
 </body>
 </html>
