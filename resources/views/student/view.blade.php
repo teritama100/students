@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>学生詳細表示画面</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="ajax-search-detail-url" content="{{ route('student.ajaxSearchDetail') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <h1>学生詳細表示画面</h1>
 
     <form action="{{ url('/student/view') }}" method="POST" enctype="multipart/form-data">
         @csrf
-        
-        <h1>{{ $students->name }}の詳細</h1>
-<p>学年: {{ $students->grade }}</p>
-<p>住所: {{ $students->address }}</p>
+        <input type="text" id="searchName" placeholder="名前で検索">
+
+<div id="studentDetail">
+
+    <h1>{{ $students->name }}の詳細</h1>
+    <p>学年: {{ $students->grade }}</p>
+    <p>住所: {{ $students->address }}</p>
 
 @if ($students->img_path)
     <p>顔写真:</p>
@@ -39,10 +45,35 @@
     <p>美術: {{ $grade->art }}</p>
     <p>保健体育: {{ $grade->health_and_physical_education }}</p>
     @endforeach
+    </form>
     <a href="{{ url('/top8/' . $students->id) }}"><button type="button">成績編集へ</button></a>
-</form>
     <a href="{{ url('/top7/' . $students->id) }}"><button type="button">成績登録へ</button></a>
-
+    <form action="{{ route('student.destroy', $students->id) }}" method="POST" onsubmit="return confirm('本当に削除しますか？');">
+    @csrf
+    @method('DELETE')
+    <button type="submit">削除</button>
+</form>
 <a href="{{ url('/top3') }}"><button type="button">戻る</button></a>
+
+    <script>
+        $(document).ready(function() {
+            $('#searchName').on('input', function () {
+                let name = $(this).val();
+                let url = $('meta[name="ajax-search-detail-url"]').attr('content');
+
+                $.ajax({
+                    url: url,
+                    method: "GET",
+                    data: { name: name },
+                    success: function (res) {
+                        $('#studentDetail').html(res.html.join(''));
+                    },
+                    error: function () {
+                        $('#studentDetail').html('<p>検索中にエラーが発生しました</p>');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

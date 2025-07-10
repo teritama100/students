@@ -26,6 +26,22 @@ class StudentController extends Controller //
             'img_path' => 'nullable|image',
             'comment' => 'nullable|string|max:500',
         ]);
+        $student = new Student();
+        $student->name = $request->name;
+        $student->grade = $request->grade;
+        $student->address = $request->address;
+        $student->comment = $request->comment;
+
+        if ($request->hasFile('img_path')) {
+            $path = $request->file('img_path')->store('photos', 'public');
+            $student->img_path = $path;
+        }
+
+        $student->save();
+
+        return redirect('/top2')->with('success', '学生登録が完了しました');
+    
+
 {
     $validated = $request->validate([
         'student_id' => 'required|exists:students,id',
@@ -100,10 +116,10 @@ public function show($id)
 }
 public function top5($id)
 {
-    $students = Student::findOrFail($id); // 変数名だけ合わせる
+    $students = Student::findOrFail($id); // ← students に1人だけ入れる
     $school_grades = \App\SchoolGrade::where('student_id', $id)->get();
 
-    return view('student.view', compact('students', 'school_grades'));
+    return view('student.view', compact('students', 'school_grades')); // students のまま渡す
 }
 public function top6($id)
 {
@@ -222,5 +238,75 @@ public function update(Request $request)
 
     return redirect()->route('top5', ['id' => $student->id])->with('success', '学生情報を更新しました。');
 }
+public function ajaxSearch(Request $request)
+{
+    $query = \App\Student::query();
 
+    if ($request->filled('name')) {
+        $query->where('name', 'like', '%' . $request->name . '%');
+    }
+
+    if ($request->filled('grade')) {
+        $query->where('grade', $request->grade);
+    }
+
+    $sortOrder = $request->get('sort', 'asc');
+    $query->orderBy('grade', $sortOrder);
+
+    $students = $query->get();
+
+    // 一覧表示なのでJSONでデータだけ返す
+    return response()->json($students);
+}
+public function ajaxSearchDetail(Request $request)
+{
+    $name = $request->input('name');
+
+    $student = \App\Student::where('name', 'like', "%{$name}%")->first();
+
+    if (!$student) {
+        return response()->json(['html' => ['<p>該当する学生が見つかりません</p>']]);
+    }
+
+    $grades = \App\SchoolGrade::where('student_id', $student->id)->get();
+
+$html = view('partials.student_detail', [
+    'student' => $student, // ← 正しく student をキーにする
+    'school_grades' => $grades
+])->render();
+
+    return response()->json(['html' => [$html]]);
+}
+public function destroy($id)
+{
+    $student = Student::findOrFail($id);
+
+    // 顔写真がある場合、削除
+    if ($student->img_path && \Storage::exists('public/' . $student->img_path)) {
+        \Storage::delete('public/' . $student->img_path);
+    }
+
+    // 関連する成績も削除（リレーションある場合）
+    $student->grades()->delete(); // ← リレーション名に合わせて変更
+
+    $student->delete();
+
+    return redirect('/top3')->with('success', '学生を削除しました');
+}
+
+// StudentController.php に追加
+public function updateGrade(Request $request)
+{
+    // 学年を一括で更新する処理（例: grade が数値のときに +1）
+    $students = \App\Student::all();
+
+    foreach ($students as $student) {
+        if (is_numeric($student->grade)) {
+            $student->grade = (int)$student->grade + 1;
+            $student->save();
+        }
+    }
+
+    return redirect('/top2')->with('success', '全学生の学年を更新しました。');
+}
 }

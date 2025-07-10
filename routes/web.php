@@ -73,3 +73,10 @@ Route::get('/students', [StudentController::class, 'index']);
 Route::get('/students/create/{grade}', [StudentController::class, 'createWithGrade'])->name('students.createWithGrade');
 Route::post('/students/store', [StudentController::class, 'store'])->name('students.store');
 Route::post('/students/update-grade', [StudentController::class, 'updateGrade']);
+
+Route::get('/students/search', [App\Http\Controllers\StudentController::class, 'ajaxSearch'])->name('student.ajaxSearch');
+
+Route::post('/students/update-grade', [StudentController::class, 'updateGrade'])->name('students.updateGrade');
+Route::get('/student/ajax-detail', [StudentController::class, 'ajaxSearchDetail'])->name('student.ajaxSearchDetail');
+
+Route::delete('/student/{id}', [StudentController::class, 'destroy'])->name('student.destroy');
