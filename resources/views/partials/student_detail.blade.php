@@ -37,5 +37,6 @@
     @csrf
     @method('DELETE')
     <button type="submit" style="color: red;">学生を削除</button>
+    <a href="{{ url('/top3') }}"><button type="button">戻る</button></a>
 </form>
 </div>
